@@ -1,0 +1,24 @@
+---
+
+- name: Set root password
+  ansible.builtin.user:
+    name: root
+    password: "{{ root_login_password | password_hash('sha512') }}"
+  become: true
+  when: root_login_password is defined
+
+- name: Update authorized SSH key for user root
+  block:
+  - name: Add new SSH key for user root
+    ansible.posix.authorized_key:
+      user: root
+      key: '{{ root_authorized_key }}'
+    become: true
+
+  - name: Remove SSH key for user root provided by Foreman Katello Kickstart installation
+    ansible.posix.authorized_key:
+      user: root
+      key: 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPzC1siqNv0h4YvOrJT7EjxZ1jdLF03hFC/wDYlAO5fZ foreman.management.internal'
+      state: absent
+    become: true
+  when: root_authorized_key is defined
