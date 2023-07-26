@@ -1,0 +1,17 @@
+---
+
+- name: Check if legacy ifcfg configuration is used
+  ansible.builtin.find:
+    paths: '/etc/sysconfig/network-scripts/'
+  register: ifcfgFiles
+
+- name: '[DEBUG] List present legacy ifcfg files'
+  ansible.builtin.debug:
+    msg: "{{ ifcfgFiles.files | map(attribute='path') | map('regex_replace', '^(.*)/(.*)$', '\\2') | list }}"
+    verbosity: 1
+
+- name: Migrate legacy ifcfg files to NetworkManager keyfiles
+  ansible.builtin.shell:
+    cmd: nmcli conn migrate
+  become: true
+  when: ifcfgFiles.matched > 0
