@@ -12,6 +12,6 @@
 
 - name: Migrate legacy ifcfg files to NetworkManager keyfiles
   ansible.builtin.shell:
-    cmd: nmcli conn migrate
+    cmd: nmcli connection migrate
   become: true
   when: ifcfgFiles.matched > 0
